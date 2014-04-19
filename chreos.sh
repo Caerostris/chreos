@@ -1,3 +1,8 @@
+# This is a modified version of jay0lee's Chrubuntu. Check out his cool work at https://github.com/jay0lee/chrubuntu-script
+# The file you are looking at right now is based on his older version, which you can find here: http://goo.gl/s9ryd
+# Original release blogpost: http://chromeos-cr48.blogspot.de/search?updated-max=2013-06-26T08:52:00-04:00&max-results=3
+# Like this? Do ahead and donate a few bucks to jay0lee (link above)
+
 # fw_type will always be developer for Mario.
 # Alex and ZGB need the developer BIOS installed though.
 fw_type="`crossystem mainfw_type`"
@@ -27,7 +32,7 @@ if [ "$3" != "" ]; then
   echo ""
   echo "WARNING! All data on this device will be wiped out! Continue at your own risk!"
   echo ""
-  read -p "Press [Enter] to install ChrUbuntu on ${target_disk} or CTRL+C to quit"
+  read -p "Press [Enter] to install ElementaryOS on ${target_disk} or CTRL+C to quit"
 
   ext_size="`blockdev --getsz ${target_disk}`"
   aroot_size=$((ext_size - 65600 - 33))
@@ -53,7 +58,7 @@ else
   then
     while :
     do
-      read -p "Enter the size in gigabytes you want to reserve for Ubuntu. Acceptable range is 5 to $max_ubuntu_size  but $rec_ubuntu_size is the recommended maximum: " ubuntu_size
+      read -p "Enter the size in gigabytes you want to reserve for ElementaryOS. Acceptable range is 5 to $max_ubuntu_size  but $rec_ubuntu_size is the recommended maximum: " ubuntu_size
       if [ ! $ubuntu_size -ne 0 2>/dev/null ]
       then
         echo -e "\n\nNumbers only please...\n\n"
@@ -88,7 +93,7 @@ else
 
     #Do the real work
 
-    echo -e "\n\nModifying partition table to make room for Ubuntu."
+    echo -e "\n\nModifying partition table to make room for ElementaryOS."
     echo -e "Your Chromebook will reboot, wipe your data and then"
     echo -e "you should re-run this script..."
     umount -f /mnt/stateful_partition
@@ -112,40 +117,18 @@ hwid="`crossystem hwid`"
 
 chromebook_arch="`uname -m`"
 
-ubuntu_metapackage=${1:-default}
-
-latest_ubuntu=`wget --quiet -O - http://changelogs.ubuntu.com/meta-release | grep "^Version: " | tail -1 | sed -r 's/^Version: ([^ ]+)( LTS)?$/\1/'`
-ubuntu_version=${2:-$latest_ubuntu}
-
-if [ "$ubuntu_version" = "lts" ]
-then
-  ubuntu_version=`wget --quiet -O - http://changelogs.ubuntu.com/meta-release | grep "^Version:" | grep "LTS" | tail -1 | sed -r 's/^Version: ([^ ]+)( LTS)?$/\1/'`
-elif [ "$ubuntu_version" = "latest" ]
-then
-  ubuntu_version=$latest_ubuntu
-fi
+ubuntu_metapackage="elementary-desktop"
+ubuntu_version="12.04"
 
 if [ "$chromebook_arch" = "x86_64" ]
 then
   ubuntu_arch="amd64"
-  if [ "$ubuntu_metapackage" = "default" ]
-  then
-    ubuntu_metapackage="ubuntu-desktop"
-  fi
 elif [ "$chromebook_arch" = "i686" ]
 then
   ubuntu_arch="i386"
-  if [ "$ubuntu_metapackage" = "default" ]
-  then
-    ubuntu_metapackage="ubuntu-desktop"
-  fi
 elif [ "$chromebook_arch" = "armv7l" ]
 then
   ubuntu_arch="armhf"
-  if [ "$ubuntu_metapackage" = "default" ]
-  then
-    ubuntu_metapackage="xubuntu-desktop"
-  fi
 else
   echo -e "Error: This script doesn't know how to install ChrUbuntu on $chromebook_arch"
   exit
@@ -153,7 +136,7 @@ fi
 
 echo -e "\nChrome device model is: $hwid\n"
 
-echo -e "Installing Ubuntu ${ubuntu_version} with metapackage ${ubuntu_metapackage}\n"
+echo -e "Installing Ubuntu ${ubuntu_version} with ElementaryOS patches"
 
 echo -e "Kernel Arch is: $chromebook_arch  Installing Ubuntu Arch: $ubuntu_arch\n"
 
@@ -191,7 +174,12 @@ then
 fi
 mount -t ext4 ${target_rootfs} /tmp/urfs
 
-tar_file="http://cdimage.ubuntu.com/ubuntu-core/releases/$ubuntu_version/release/ubuntu-core-$ubuntu_version-core-$ubuntu_arch.tar.gz"
+ubuntu_version_file="$ubuntu_version"
+if [ "$ubuntu_version" = "12.04" ]
+then
+  ubuntu_version_file="12.04.4"
+fi
+tar_file="http://cdimage.ubuntu.com/ubuntu-core/releases/$ubuntu_version/release/ubuntu-core-$ubuntu_version_file-core-$ubuntu_arch.tar.gz"
 if [ $ubuntu_version = "dev" ]
 then
   ubuntu_animal=`wget --quiet -O - http://changelogs.ubuntu.com/meta-release-development | grep "^Dist: " | tail -1 | sed -r 's/^Dist: (.*)$/\1/'`
@@ -224,7 +212,7 @@ echo -e "\n127.0.1.1       chrubuntu" >> /tmp/urfs/etc/hosts
 #ff02::2 ip6-allrouters" > /tmp/urfs/etc/hosts
 
 cr_install="wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-add-apt-repository \"deb http://dl.google.com/linux/chrome/deb/ stable main\"
+echo \"deb http://dl.google.com/linux/chrome/deb/ stable main\" >> /etc/apt/sources.list.d/google-chrome.list
 apt-get update
 apt-get -y install google-chrome-stable"
 if [ $ubuntu_arch = 'armhf' ]
@@ -245,12 +233,13 @@ apt-get -y dist-upgrade
 apt-get -y install ubuntu-minimal
 apt-get -y install wget
 apt-get -y install $add_apt_repository_package
-add-apt-repository main
-add-apt-repository universe
-add-apt-repository restricted
-add-apt-repository multiverse
+if [ \"$ubuntu_metapackage\" = \"elementary-desktop\" ]
+then
+  add-apt-repository -y ppa:elementary-os/stable
+  add-apt-repository -y ppa:elementary-os/os-patches
+fi
 apt-get update
-apt-get -y install $ubuntu_metapackage
+apt-get -y install nano whois gedit screen $ubuntu_metapackage
 $cr_install
 if [ -f /usr/lib/lightdm/lightdm-set-defaults ]
 then
@@ -298,18 +287,18 @@ cgpt add -i 6 -P 5 -T 1 ${target_disk}
 
 echo -e "
 
-Installation seems to be complete. If ChrUbuntu fails when you reboot,
+Installation seems to be complete. If ElementaryOS fails when you reboot,
 power off your Chrome OS device and then turn it back on. You'll be back
-in Chrome OS. If you're happy with ChrUbuntu when you reboot be sure to run:
+in Chrome OS. If you're happy with ElementaryOS when you reboot be sure to run:
 
 sudo cgpt add -i 6 -P 5 -S 1 ${target_disk}
 
-To make it the default boot option. The ChrUbuntu login is:
+To make it the default boot option. The login is:
 
 Username:  user
 Password:  user
 
-We're now ready to start ChrUbuntu!
+We're now ready to start ElementaryOS!
 "
 
 read -p "Press [Enter] to reboot..."

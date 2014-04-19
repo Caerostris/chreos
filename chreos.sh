@@ -9,7 +9,7 @@ if [ ! "$fw_type" = "developer" ]
     echo -e "sudo chromeos-firmwareupdate --mode=todev"
     echo -e ""
     echo -e "and then re-run this script."
-    exit 
+    exit
 fi
 
 powerd_status="`initctl status powerd`"
@@ -32,7 +32,7 @@ if [ "$3" != "" ]; then
   ext_size="`blockdev --getsz ${target_disk}`"
   aroot_size=$((ext_size - 65600 - 33))
   parted --script ${target_disk} "mktable gpt"
-  cgpt create ${target_disk} 
+  cgpt create ${target_disk}
   cgpt add -i 6 -b 64 -s 32768 -S 1 -P 5 -l KERN-A -t "kernel" ${target_disk}
   cgpt add -i 7 -b 65600 -s $aroot_size -l ROOT-A -t "rootfs" ${target_disk}
   sync
@@ -88,7 +88,7 @@ else
 
     #Do the real work
 
-    echo -e "\n\nModifying partition table to make room for Ubuntu." 
+    echo -e "\n\nModifying partition table to make room for Ubuntu."
     echo -e "Your Chromebook will reboot, wipe your data and then"
     echo -e "you should re-run this script..."
     umount -f /mnt/stateful_partition
@@ -180,7 +180,7 @@ echo "Target Kernel Partition: $target_kern  Target Root FS: ${target_rootfs}"
 if mount|grep ${target_rootfs}
 then
   echo "Refusing to continue since ${target_rootfs} is formatted and mounted. Try rebooting"
-  exit 
+  exit
 fi
 
 mkfs.ext4 ${target_rootfs}
@@ -248,7 +248,7 @@ apt-get -y install $add_apt_repository_package
 add-apt-repository main
 add-apt-repository universe
 add-apt-repository restricted
-add-apt-repository multiverse 
+add-apt-repository multiverse
 apt-get update
 apt-get -y install $ubuntu_metapackage
 $cr_install

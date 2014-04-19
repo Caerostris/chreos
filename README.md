@@ -12,9 +12,9 @@ Installation
 
 You need to have the Developer Mode enabled.  
 In ChromeOS, hit Ctrl+Alt+F2 and log in as root.  
-`cd /home  
-curl -L -O link-to-chreos.sh  
-bash chreos.sh`  
+```cd /home
+curl -L -O http://goo.gl/7jzCfn
+bash 7jzCfn```
 The script will reboot & reset your Chromebook once.   
 After this is done, you have to re-download and re-run the script.
 

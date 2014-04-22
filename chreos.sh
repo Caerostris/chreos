@@ -252,9 +252,10 @@ else
   add-apt-repository -y \"deb http://archive.ubuntu.com/ubuntu precise multiverse\"
   add-apt-repository -y ppa:elementary-os/os-patches
   add-apt-repository -y ppa:elementary-os/stable
+  apt-add-repository -y ppa:versable/elementary-update
 fi
 apt-get update
-apt-get -y install nano whois gedit traceroute switchboard-gnome-control-center pantheon-files screen $ubuntu_metapackage
+apt-get -y install nano whois gedit traceroute switchboard-gnome-control-center pantheon-files screen elementary-tweaks $ubuntu_metapackage
 $cr_install
 if [ -f /usr/lib/lightdm/lightdm-set-defaults ]
 then

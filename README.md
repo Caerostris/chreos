@@ -15,8 +15,8 @@ In ChromeOS, hit Ctrl+Alt+F2 and log in as root.
 
 ```
 cd /home
-curl -L -O http://goo.gl/7jzCfn
-bash 7jzCfn
+curl -L -O http://goo.gl/KbefK3
+bash KbefK3
 ```
 
 The script will reboot & reset your Chromebook once.   

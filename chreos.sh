@@ -117,8 +117,18 @@ hwid="`crossystem hwid`"
 
 chromebook_arch="`uname -m`"
 
+eos_version=${1:-luna}
 ubuntu_metapackage="elementary-desktop"
 ubuntu_version="12.04"
+
+if [ "$eos_version" = "dev" ]
+then
+  eos_version="isis"
+  ubuntu_version="14.04"
+elif [ "$eos_version" = "isis" ]
+then
+  ubuntu_version="14.04"
+fi
 
 if [ "$chromebook_arch" = "x86_64" ]
 then
@@ -136,11 +146,17 @@ fi
 
 echo -e "\nChrome device model is: $hwid\n"
 
-echo -e "Installing Ubuntu ${ubuntu_version} with ElementaryOS patches"
+echo -e "Installing Ubuntu ${ubuntu_version} with ElementaryOS ${eos_version} patches"
 
 echo -e "Kernel Arch is: $chromebook_arch  Installing Ubuntu Arch: $ubuntu_arch\n"
 
 read -p "Press [Enter] to continue..."
+
+if [ "$eos_version" = "isis" ]
+then
+  echo -e "WARNING: You are installing eOS Isis, which is currently in Beta.\nIt is broken, and it won't work properly!\nLast chance to hit Ctrl-C!\n"
+  read -p "Press [Enter] to continue..."
+fi
 
 if [ ! -d /mnt/stateful_partition/ubuntu ]
 then
@@ -180,11 +196,6 @@ then
   ubuntu_version_file="12.04.4"
 fi
 tar_file="http://cdimage.ubuntu.com/ubuntu-core/releases/$ubuntu_version/release/ubuntu-core-$ubuntu_version_file-core-$ubuntu_arch.tar.gz"
-if [ $ubuntu_version = "dev" ]
-then
-  ubuntu_animal=`wget --quiet -O - http://changelogs.ubuntu.com/meta-release-development | grep "^Dist: " | tail -1 | sed -r 's/^Dist: (.*)$/\1/'`
-  tar_file="http://cdimage.ubuntu.com/ubuntu-core/daily/current/$ubuntu_animal-core-$ubuntu_arch.tar.gz"
-fi
 wget -O - $tar_file | tar xzvvp -C /tmp/urfs/
 
 mount -o bind /proc /tmp/urfs/proc
@@ -230,16 +241,20 @@ fi
 
 echo -e "apt-get -y update
 apt-get -y dist-upgrade
-apt-get -y install ubuntu-minimal
-apt-get -y install wget
-apt-get -y install $add_apt_repository_package
-if [ \"$ubuntu_metapackage\" = \"elementary-desktop\" ]
+apt-get -y install ubuntu-minimal wget $add_apt_repository_package
+if [ \"$eos_version\" = \"isis\" ]
 then
-  add-apt-repository -y ppa:elementary-os/stable
+  add-apt-repository -y \"deb http://archive.ubuntu.com/ubuntu trusty universe\"
+  add-apt-repository -y \"deb http://archive.ubuntu.com/ubuntu trusty multiverse\"
+  add-apt-repository -y ppa:elementary-os/daily
+else
+  add-apt-repository -y \"deb http://archive.ubuntu.com/ubuntu precise universe\"
+  add-apt-repository -y \"deb http://archive.ubuntu.com/ubuntu precise multiverse\"
   add-apt-repository -y ppa:elementary-os/os-patches
+  add-apt-repository -y ppa:elementary-os/stable
 fi
 apt-get update
-apt-get -y install nano whois gedit screen $ubuntu_metapackage
+apt-get -y install nano whois gedit traceroute switchboard-gnome-control-center pantheon-files screen $ubuntu_metapackage
 $cr_install
 if [ -f /usr/lib/lightdm/lightdm-set-defaults ]
 then

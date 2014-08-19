@@ -123,9 +123,9 @@ ubuntu_version="12.04"
 
 if [ "$eos_version" = "dev" ]
 then
-  eos_version="isis"
+  eos_version="freya"
   ubuntu_version="14.04"
-elif [ "$eos_version" = "isis" ]
+elif [ "$eos_version" = "freya" ]
 then
   ubuntu_version="14.04"
 fi
@@ -152,9 +152,9 @@ echo -e "Kernel Arch is: $chromebook_arch  Installing Ubuntu Arch: $ubuntu_arch\
 
 read -p "Press [Enter] to continue..."
 
-if [ "$eos_version" = "isis" ]
+if [ "$eos_version" = "freya" ]
 then
-  echo -e "WARNING: You are installing eOS Isis, which is currently in Beta.\nIt is broken, and it won't work properly!\nLast chance to hit Ctrl-C!\n"
+  echo -e "WARNING: You are installing eOS freya, which is currently in Beta.\nIt is broken, and it won't work properly!\nLast chance to hit Ctrl-C!\n"
   read -p "Press [Enter] to continue..."
 fi
 
@@ -242,7 +242,7 @@ fi
 echo -e "apt-get -y update
 apt-get -y dist-upgrade
 apt-get -y install ubuntu-minimal wget $add_apt_repository_package
-if [ \"$eos_version\" = \"isis\" ]
+if [ \"$eos_version\" = \"freya\" ]
 then
   add-apt-repository -y \"deb http://archive.ubuntu.com/ubuntu trusty universe\"
   add-apt-repository -y \"deb http://archive.ubuntu.com/ubuntu trusty multiverse\"

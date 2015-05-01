@@ -8,7 +8,7 @@
 fw_type="`crossystem mainfw_type`"
 if [ ! "$fw_type" = "developer" ]
   then
-    echo -e "\nYou're Chromebook is not running a developer BIOS!"
+    echo -e "\nYour Chromebook is not running a developer BIOS!"
     echo -e "You need to run:"
     echo -e ""
     echo -e "sudo chromeos-firmwareupdate --mode=todev"
@@ -117,15 +117,16 @@ hwid="`crossystem hwid`"
 
 chromebook_arch="`uname -m`"
 
-eos_version=${1:-luna}
+eos_version=${1:-freya}
 ubuntu_metapackage="elementary-desktop"
-ubuntu_version="12.04"
+ubuntu_version="14.04"
 
 if [ "$eos_version" = "dev" ]
 then
-  eos_version="freya"
-  ubuntu_version="14.04"
-elif [ "$eos_version" = "freya" ]
+  eos_version="loki"
+fi
+
+if [ "$eos_version" = "loki" ]
 then
   ubuntu_version="14.04"
 fi
@@ -152,9 +153,9 @@ echo -e "Kernel Arch is: $chromebook_arch  Installing Ubuntu Arch: $ubuntu_arch\
 
 read -p "Press [Enter] to continue..."
 
-if [ "$eos_version" = "freya" ]
+if [ "$eos_version" = "loki" ]
 then
-  echo -e "WARNING: You are installing eOS freya, which is currently in Beta.\nIt is broken, and it won't work properly!\nLast chance to hit Ctrl-C!\n"
+  echo -e "WARNING: You are installing eOS ${eos_version}, which is currently in Beta.\nIt is broken, and it won't work properly!\nLast chance to hit Ctrl-C!\n"
   read -p "Press [Enter] to continue..."
 fi
 
@@ -242,22 +243,19 @@ fi
 echo -e "apt-get -y update
 apt-get -y dist-upgrade
 apt-get -y install ubuntu-minimal wget $add_apt_repository_package
-if [ \"$eos_version\" = \"freya\" ]
+if [ \"$eos_version\" = \"loki\" ]
 then
   add-apt-repository -y \"deb http://archive.ubuntu.com/ubuntu trusty universe\"
   add-apt-repository -y \"deb http://archive.ubuntu.com/ubuntu trusty multiverse\"
   add-apt-repository -y ppa:elementary-os/daily
 else
-  add-apt-repository -y \"deb http://archive.ubuntu.com/ubuntu precise universe\"
-  add-apt-repository -y \"deb http://archive.ubuntu.com/ubuntu precise multiverse\"
+  add-apt-repository -y \"deb http://archive.ubuntu.com/ubuntu trusty universe\"
+  add-apt-repository -y \"deb http://archive.ubuntu.com/ubuntu trusty multiverse\"
   add-apt-repository -y ppa:elementary-os/os-patches
   add-apt-repository -y ppa:elementary-os/stable
-  apt-add-repository -y ppa:versable/elementary-update
-
-  elementary_tweaks="elementary-tweaks"
 fi
 apt-get update
-apt-get -y install nano whois gedit traceroute switchboard-gnome-control-center pantheon-files screen $elementary_tweaks $ubuntu_metapackage
+apt-get -y install nano whois gedit traceroute switchboard-gnome-control-center pantheon-files screen $ubuntu_metapackage switchboard-plug-gcc-users switchboard-plug-gcc-date
 $cr_install
 if [ -f /usr/lib/lightdm/lightdm-set-defaults ]
 then
